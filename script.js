@@ -1,9 +1,5 @@
 // Start Active Players in Yahoo Fantasy Hockey League
 
-// So, you want to set your lineup for the rest of the season? Or maybe it's
-// just to make sure you have guys playing for the week while you're away.
-// Either way, I've got you covered!
-
 // ****************************************
 // **** DON'T WANT TO READ EVERYTHING? ****
 // ****************************************
@@ -26,7 +22,7 @@
 // Internet Explorer
 //   Windows: F12 > Console
 
-// If none of those work, try Google
+// If none of those work, try Google.
 
 // To start, if you don't modify anything, this will start setting your
 // lineups from today until the last day of the season. The ONLY thing you
@@ -39,11 +35,10 @@
 // the page and everything will go back to normal.
 
 // I've also left comments in the code if you want to see what's going on
-// underneath the hood. So, without further ado..
+// underneath the hood.
 
-// timer is a global object so if anything goes wrong, we can cancel it
-// with "clearInterval(timer)" (without the quotation marks)
-// Mostly for testing purposes
+// timer is a global object. If anything goes wrong,
+// we can cancel it with clearInterval(timer)
 var timer = undefined;
 
 // To request pages without needing to load all of its files, we're including
@@ -53,20 +48,34 @@ var jq = document.createElement('script');
 jq.setAttribute('src', '//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js');
 body.appendChild(jq);
 
+function getEndDate(sport) {
+  // Since end dates change season-to-season
+  // We're going to use a default date
+  switch (sport) {
+    case 'hockey':
+      return '04-15';
+    case 'football':
+      return '01-15'
+    case 'baseball':
+      return '10-15'
+    case 'basketball':
+      return '05-01'
+    default:
+      return '06-01'
+  }
+}
+
 // Since we need jQuery, we're only running the rest of the code after its loaded
 jq.onload = function () {
 
   // Date you want to start setting your active players, YYYY-MM-DD
   // Make sure it's set within the same quotation marks on either side
   // You can leave this commented out; it'll start on today's date
-  // var startDate = '2014-12-31';
-
-  // Last game of the season is played on April 13th :(
-  var endOfSeason = new Date('2014-04-13');
+  // var startDate = 'YYYY-MM-DD';
 
   // If you've specified a custom start date, use that
   // If not, use today as a starting point
-  var date = undefined;
+  var date;
 
   if (typeof startDate !== 'undefined') {
     date = new Date(startDate);
@@ -75,31 +84,24 @@ jq.onload = function () {
   }
 
   // Undefined variables (for now) to store dates
-  var daysRemaining = undefined;
-  var newYear = undefined;
-  var newMonth = undefined;
-  var newDay = undefined;
+  var daysRemaining, newYear, newMonth, newDay;
 
   // The URL holds the information to your league and team IDs
-  var url = window.location.href;
-
-  // Let's break down the URL
-  // What we need is the League's ID and your Team's ID
-  // http://hockey.fantasysports.yahoo.com/hockey/[leagueID]/[teamID]/
-  url = url.split('hockey/');
-  url = url[1].split('/');
-  var leagueID = url[0];
-  var teamID = url[1];
-  var crumb = '';
-  var startActiveUrl = '';
+  var url = window.location.pathname;
+  url = url.split('/');
+  var sport = url[url.length - 3];
+  var leagueID = url[url.length - 2];
+  var teamID = url[url.length - 1];
+  var crumb, startActiveUrl;
 
   // Now, there's a little crumb that we need to add to the end of the URL
   // I'm not sure if it's the same for everyone so let's just find and use it
-  var els = document.getElementsByTagName("a");
+  var els = document.getElementsByTagName("a"),
+    el;
 
   // For every <a> element (button/link) on the page
   for (var i = 0, l = els.length; i < l; i++) {
-    var el = els[i];
+    el = els[i];
 
     // If any of their link values contain "crumb"
     if (el.href.match('crumb')) {
@@ -112,35 +114,22 @@ jq.onload = function () {
   }
 
   (function setDaysRemaining () {
-
     // Hours * minutes * seconds * milliseconds
     var oneDay = 24 * 60 * 60 * 1000;
     var firstDate = date;
-    var secondDate = endOfSeason;
+    var endDateString = (new Date()).getFullYear() + '-' + getEndDate(sport);
+    var secondDate = new Date(endDateString);
 
     // Calculate the days remaining based on the startDate (or today)
     // and the last game of the season (endOfSeason)
     daysRemaining = Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay)) + 1;
 
-    // Set the (currently) undefined variables
-    setNewDate();
-
-    // Set the day to the starting day plus 1
-    date.setDate(parseInt(newDay, 10) + 1);
-
     // Start a timer, fun
     timer = setInterval(function() {
-
-      // At the end of this, we subtract 1 from the amount of days left in
-      // the season. If the daysRemaining is above 0 before that, run this
-      // part of the code
       if (daysRemaining > 0) {
 
-        // Update the date
-        setNewDate();
-
         // Let's create a new URL from your settings
-        startActiveUrl = 'http://hockey.fantasysports.yahoo.com/hockey/' + leagueID + '/' + teamID + '/startactiveplayers?date=' + newYear + '-' + newMonth + '-' + newDay + '&crumb=' + crumb;
+        startActiveUrl = window.location.protocol + '//' + sport + '.fantasysports.yahoo.com/' + sport + '/' + leagueID + '/' + teamID + '/startactiveplayers?date=' + setNewDate() + '&crumb=' + crumb;
 
         // Here, we're going to use the jQuery script we loaded before to
         // send a GET request. Reason being was to send many requests
@@ -151,43 +140,32 @@ jq.onload = function () {
         // Little note for you in the console
         console.log('Setting roster for: ' + date);
 
-        // Since we may need to set newDay to a string (if its a single digit
-        // day, 1 to 9), convert it back into an integer/number so we can
-        // calculate the next date
-        newDay = parseInt(newDay, 10);
+        daysRemaining -= 1;
 
         // Calculate the next date
-        date.setDate(newDay + 1);
-
+        date.setDate(date.getDate() + 1);
       } else {
-
         // If there are no more days remaining from startDate (or today) and
         // endOfSeason, cancel the timer and show an alert box
         clearInterval(timer);
         alert('All of your lineups have been set!');
-
       }
-
-      // Remember above we talked about subtracting 1 from the total days
-      // remaining? This is it
-      daysRemaining -= 1;
 
     // JavaScript time is run in milliseconds
     // 1000ms = 1s
     // Run the timer every second
-    }, 200);
+    }, 500);
 
   })();
 
   function setNewDate () {
-
     // From the new date we created, get the values for year, month, day
-    newYear = date.getFullYear();
+    var newYear = date.getFullYear();
 
     // Note: in JavaScript, months run 0 to 11, so April is month 3, not 4
     // For Yahoo though, we need the actual month number
-    newMonth = date.getMonth() + 1;
-    newDay = date.getDate();
+    var newMonth = date.getMonth() + 1;
+    var newDay = date.getDate();
 
     // Same as in the beginning, if a month or day is a single digit,
     // add a '0' in front of it; again, for Yahoo
@@ -198,6 +176,8 @@ jq.onload = function () {
     if (newDay.toString().length === 1) {
       newDay = '0' + newDay;
     }
+
+    return newYear + '-' + newMonth + '-' + newDay;
   }
 
   // That's it! You're all set to get your lineups rolling with a little code.
