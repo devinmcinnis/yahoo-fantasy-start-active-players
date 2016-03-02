@@ -89,9 +89,9 @@ jq.onload = function () {
   // The URL holds the information to your league and team IDs
   var url = window.location.pathname;
   url = url.split('/');
-  var sport = url[url.length - 3];
-  var leagueID = url[url.length - 2];
-  var teamID = url[url.length - 1];
+  var sport = url[1];
+  var leagueID = url[2];
+  var teamID = url[3];
   var crumb, startActiveUrl;
 
   // Now, there's a little crumb that we need to add to the end of the URL
