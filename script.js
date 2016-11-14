@@ -48,6 +48,15 @@ var jq = document.createElement('script');
 jq.setAttribute('src', '//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js');
 body.appendChild(jq);
 
+//
+var leagueToSportMap =
+{
+  'nba' : 'basketball',
+  'nhl' : 'hockey',
+  'nfl' : 'football',
+  'mlb' : 'baseball'
+};
+
 function getEndDate(sport) {
   // Since end dates change season-to-season
   // We're going to use a default date
@@ -89,7 +98,8 @@ jq.onload = function () {
   // The URL holds the information to your league and team IDs
   var url = window.location.pathname;
   url = url.split('/');
-  var sport = url[1];
+  var league = url[1];
+  var sport = leagueToSportMap[league];
   var leagueID = url[2];
   var teamID = url[3];
   var crumb, startActiveUrl;
@@ -129,7 +139,7 @@ jq.onload = function () {
       if (daysRemaining > 0) {
 
         // Let's create a new URL from your settings
-        startActiveUrl = window.location.protocol + '//' + sport + '.fantasysports.yahoo.com/' + sport + '/' + leagueID + '/' + teamID + '/startactiveplayers?date=' + setNewDate() + '&crumb=' + crumb;
+        startActiveUrl = window.location.protocol + '//' + sport + '.fantasysports.yahoo.com/' + league + '/' + leagueID + '/' + teamID + '/startactiveplayers?date=' + setNewDate() + '&crumb=' + crumb;
 
         // Here, we're going to use the jQuery script we loaded before to
         // send a GET request. Reason being was to send many requests
