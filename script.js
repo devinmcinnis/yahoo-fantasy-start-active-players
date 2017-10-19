@@ -49,8 +49,7 @@ jq.setAttribute('src', '//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min
 body.appendChild(jq);
 
 //
-var leagueToSportMap =
-{
+var leagueToSportMap = {
   'nba' : 'basketball',
   'hockey' : 'hockey',
   'nfl' : 'football',
@@ -139,7 +138,7 @@ jq.onload = function () {
       if (daysRemaining > 0) {
 
         // Let's create a new URL from your settings
-        startActiveUrl = window.location.protocol + '//' + sport + '.fantasysports.yahoo.com/' + league + '/' + leagueID + '/' + teamID + '/startactiveplayers?date=' + setNewDate() + '&crumb=' + crumb;
+        startActiveUrl = '//' + sport + '.fantasysports.yahoo.com/' + league + '/' + leagueID + '/' + teamID + '/startactiveplayers?date=' + setNewDate() + '&crumb=' + crumb;
 
         // Here, we're going to use the jQuery script we loaded before to
         // send a GET request. Reason being was to send many requests
