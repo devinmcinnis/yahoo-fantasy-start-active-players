@@ -52,7 +52,7 @@ body.appendChild(jq);
 var leagueToSportMap =
 {
   'nba' : 'basketball',
-  'nhl' : 'hockey',
+  'hockey' : 'hockey',
   'nfl' : 'football',
   'mlb' : 'baseball'
 };
